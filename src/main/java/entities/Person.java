@@ -103,6 +103,7 @@ public class Person {
         return age;
     }
 
+    @PostLoad
     public void setAge( ) {
         java.time.Duration duration = java.time.Duration.between(this.birthDate, LocalDateTime.now());
         this.age = (int) duration.toDays() / 365;

@@ -27,17 +27,20 @@ public class PersonFacade {
         }
         return p;
     }
+
     public List<Person> getAllPersons(){
         EntityManager em = emf.createEntityManager();
         TypedQuery<Person> tq = em.createQuery("SELECT p FROM Person p", Person.class);
         List<Person> persons = tq.getResultList();
         return persons;
     }
+
     public Person getPerson(Long id){
         EntityManager em = emf.createEntityManager();
         Person p = em.find(Person.class, id);
         return p;
     }
+
     public Person updatePerson(Person p){
         EntityManager em = emf.createEntityManager();
         Person found = em.find(Person.class, p.getId());
@@ -53,6 +56,7 @@ public class PersonFacade {
         }
         return p;
     }
+
     public Person deletePerson(Long id){
         EntityManager em = emf.createEntityManager();
         Person p = em.find(Person.class, id);
@@ -89,12 +93,12 @@ public class PersonFacade {
 //        System.out.println("DELETE PERSON WITH ID 1");
 //        pf.deletePerson(1L);
         pf.getAllPersons().forEach((person)-> System.out.println(person));
-        EntityManager em = emf.createEntityManager();
-        em.getTransaction().begin();
-        TypedQuery<Person> tq = em.createNamedQuery("Person.deleteById", Person.class);
-        tq.setParameter("id", 1L);
-        tq.executeUpdate();
-        em.getTransaction().commit();
-        em.close();
+//        EntityManager em = emf.createEntityManager();
+//        em.getTransaction().begin();
+//        TypedQuery<Person> tq = em.createNamedQuery("Person.deleteById", Person.class);
+//        tq.setParameter("id", 1L);
+//        tq.executeUpdate();
+//        em.getTransaction().commit();
+//        em.close();
     }
 }
