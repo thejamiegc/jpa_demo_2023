@@ -3,6 +3,7 @@ package facades;
 import entities.Person;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class PersonFacade {
@@ -62,7 +63,7 @@ public class PersonFacade {
 
     public static void main(String[] args) {
         PersonFacade pf = new PersonFacade();
-        Person p = new Person("Jesper", 43);
+        Person p = new Person("Jesper", 43, "1968-01-01 00:00:00");
         p.addAddress("Hovedgaden 1");
         pf.createPerson(p);
 //        System.out.println("The person got this new id: " + p.getId());

@@ -9,7 +9,7 @@
         <unpackNestedArchives>false</unpackNestedArchives>
       </options>
     </properties>
-    <root id="archive" name="jpa_demo_day1-1.0-SNAPSHOT.war">
+    <root id="archive" name="jpa_demo_day2-1.0-SNAPSHOT.war">
       <element id="artifact" artifact-name="jpa_demo_day1:war exploded" />
     </root>
   </artifact>

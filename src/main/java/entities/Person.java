@@ -1,6 +1,11 @@
 package entities;
 
+import org.eclipse.persistence.jpa.jpql.parser.DateTime;
+
 import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -15,13 +20,31 @@ public class Person {
     @Column(name = "name", nullable = false, length = 30)
     private String name;
 
+    @Column(name = "birth_date", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP) // not needed, but it's good to be explicit.
+    private LocalDateTime birthDate;
+
     @Column(name = "age")
+    @Transient // not persisted because it is derived from birthDate.
     private Integer age;
 
     @ElementCollection
     @Column(name = "address")
     @CollectionTable(name = "person_addresses", joinColumns = @JoinColumn(name = "owner_id"))
-    private Set<String> addresses = new LinkedHashSet<>();
+    private Set<String> addresses = new HashSet<>();
+
+    public Person() {
+    }
+
+    public Person(String name, Integer age) {
+        this.name = name;
+        this.age = age;
+    }
+    public Person(String name, Integer age, String birthDate) {
+        this.name = name;
+        this.age = age;
+        setBirthDate(birthDate);
+    }
 
     public Set<String> getAddresses() {
         return addresses;
@@ -37,20 +60,13 @@ public class Person {
                 this.addresses.remove(a);
     }
 
-    public Person() {
-    }
-
-    public Person(String name, Integer age) {
-        this.name = name;
-        this.age = age;
-    }
-
     public Integer getAge() {
         return age;
     }
 
-    public void setAge(Integer age) {
-        this.age = age;
+    public void setAge( ) {
+        java.time.Duration duration = java.time.Duration.between(birthDate, LocalDateTime.now());
+        this.age = (int) duration.toDays() / 365;
     }
 
     public String getName() {
@@ -67,6 +83,16 @@ public class Person {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public LocalDateTime getBirthDate() {
+        return birthDate;
+    }
+
+    public void setBirthDate(String birthDate) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        LocalDateTime bd = LocalDateTime.parse(birthDate, formatter);
+        this.birthDate = bd;
     }
 
     @Override
