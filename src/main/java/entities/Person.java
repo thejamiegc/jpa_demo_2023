@@ -4,6 +4,7 @@ import org.eclipse.persistence.jpa.jpql.parser.DateTime;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -11,6 +12,9 @@ import java.util.Set;
 
 @Entity
 @Table(name = "person")
+@NamedQueries({
+        @NamedQuery(name = "Person.deleteById", query = "delete from Person p where p.id = :id")
+})
 public class Person {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,10 +25,9 @@ public class Person {
     private String name;
 
     @Column(name = "birth_date", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP) // not needed, but it's good to be explicit.
+//    @Temporal(TemporalType.TIMESTAMP) // not needed, but it's good to be explicit.
     private LocalDateTime birthDate;
 
-    @Column(name = "age")
     @Transient // not persisted because it is derived from birthDate.
     private Integer age;
 
@@ -33,17 +36,41 @@ public class Person {
     @CollectionTable(name = "person_addresses", joinColumns = @JoinColumn(name = "owner_id"))
     private Set<String> addresses = new HashSet<>();
 
-    public Person() {
+    @OneToMany(mappedBy = "person", orphanRemoval = true, cascade = CascadeType.ALL)
+    private Set<Phone> phones = new LinkedHashSet<>();
+
+    @ManyToMany
+    @JoinTable(name = "person_cars",
+            joinColumns = @JoinColumn(name = "person_id"),
+            inverseJoinColumns = @JoinColumn(name = "cars_id"))
+    private Set<Car> cars = new LinkedHashSet<>();
+
+    @Column(name = "created", updatable = false)
+    private LocalDateTime created;
+
+    @Column(name = "modified")
+    private LocalDateTime editted;
+
+    // Database is not set to handle dates, so I do it with JPA lifecycle methods. For more see: https://www.baeldung.com/jpa-entity-lifecycle-events
+    @PreUpdate
+    public void onUpdate() {
+        editted = LocalDateTime.now(ZoneId.of("GMT+01:00"));
     }
 
-    public Person(String name, Integer age) {
-        this.name = name;
-        this.age = age;
+    @PrePersist
+    public void onPersist(){
+        editted = LocalDateTime.now(ZoneId.of("GMT+01:00"));
+        created = LocalDateTime.now(ZoneId.of("GMT+01:00"));
     }
-    public Person(String name, Integer age, String birthDate) {
+
+    public Person() { }
+    public Person(String name) {
         this.name = name;
-        this.age = age;
+    }
+    public Person(String name, String birthDate) {
+        this.name = name;
         setBirthDate(birthDate);
+        setAge();
     }
 
     public Set<String> getAddresses() {
@@ -59,13 +86,25 @@ public class Person {
             if (a == address)
                 this.addresses.remove(a);
     }
+    public Set<Car> getCars() {
+        return cars;
+    }
+
+    public void addCar(Car car) {
+        this.cars.add(car);
+        car.getPersons().add(this);
+    }
+    public void removeCar(Car car) {
+        this.cars.remove(car);
+        car.getPersons().remove(this);
+    }
 
     public Integer getAge() {
         return age;
     }
 
     public void setAge( ) {
-        java.time.Duration duration = java.time.Duration.between(birthDate, LocalDateTime.now());
+        java.time.Duration duration = java.time.Duration.between(this.birthDate, LocalDateTime.now());
         this.age = (int) duration.toDays() / 365;
     }
 
@@ -75,6 +114,20 @@ public class Person {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Set<Phone> getPhones() {
+        return phones;
+    }
+
+    public void addPhone(Phone phone) {
+        this.phones.add(phone);
+        phone.setPerson(this);
+    }
+
+    public void removePhone(Phone phone) {
+        this.phones.remove(phone);
+        phone.setPerson(null);
     }
 
     public Long getId() {
@@ -100,6 +153,8 @@ public class Person {
         return getClass().getSimpleName() + "(" +
                 "id = " + id + ", " +
                 "name = " + name + ", " +
-                "age = " + age + ")";
+                "birthDate = " + birthDate + ", " +
+                "age = " + this.age + ", " +
+                "addresses = " + addresses + ")";
     }
 }
