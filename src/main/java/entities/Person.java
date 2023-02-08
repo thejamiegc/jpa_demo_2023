@@ -33,7 +33,7 @@ public class Person {
 
     @ElementCollection
     @Column(name = "address")
-    @CollectionTable(name = "person_addresses", joinColumns = @JoinColumn(name = "owner_id"))
+    @CollectionTable(name = "person_addresses", joinColumns = @JoinColumn(name = "owner_id") )
     private Set<String> addresses = new HashSet<>();
 
     @OneToMany(mappedBy = "person", orphanRemoval = true, cascade = CascadeType.ALL)

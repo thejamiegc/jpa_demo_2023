@@ -7,8 +7,10 @@ import entities.Phone;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-public class PersonFacade {
+public class PersonFacade implements ISelector{
     static EntityManagerFactory emf = Persistence.createEntityManagerFactory("pu");
     public Person createPerson(Person p) {
         EntityManager em = emf.createEntityManager();
@@ -28,10 +30,10 @@ public class PersonFacade {
         return p;
     }
 
-    public List<Person> getAllPersons(){
+    public Set<Person> getAllPersons(){
         EntityManager em = emf.createEntityManager();
-        TypedQuery<Person> tq = em.createQuery("SELECT p FROM Person p", Person.class);
-        List<Person> persons = tq.getResultList();
+        TypedQuery<Person> tq = em.createQuery("SELECT p FROM Person p JOIN FETCH p.addresses", Person.class);
+        Set<Person> persons = tq.getResultList().stream().collect(Collectors.toSet());
         return persons;
     }
 
@@ -71,6 +73,40 @@ public class PersonFacade {
             em.close();
         }
         return p;
+    }
+
+    @Override
+    public Set<Person> getAllPeople() {
+        return getAllPersons();
+    }
+
+    @Override
+    public Person getPersonById(Long id) {
+        return getPerson(id);
+    }
+
+    @Override
+    public Person getPersonByPhone() {
+        //return null;
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    @Override
+    public Set<Person> getPeopleByCar(Car car) {
+        //return null;
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    @Override
+    public Set<Person> getPeopleAboveAvgAge() {
+        //return null;
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    @Override
+    public Set<Person> getPeopleByBirthday() {
+        //return null;
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     public static void main(String[] args) {
