@@ -86,9 +86,12 @@ public class PersonFacade implements ISelector{
     }
 
     @Override
-    public Person getPersonByPhone() {
-        //return null;
-        throw new UnsupportedOperationException("Not implemented yet");
+    public Person getPersonByPhone(String phoneNumber) {
+        EntityManager em = emf.createEntityManager();
+        TypedQuery<Person> tq = em.createQuery("SELECT p FROM Person p JOIN p.phones ph WHERE ph.number = :number", Person.class);
+        tq.setParameter("number", phoneNumber);
+        Person p = tq.getSingleResult();
+        return p;
     }
 
     @Override
@@ -99,14 +102,35 @@ public class PersonFacade implements ISelector{
 
     @Override
     public Set<Person> getPeopleAboveAvgAge() {
-        //return null;
-        throw new UnsupportedOperationException("Not implemented yet");
+       EntityManager em = emf.createEntityManager();
+       //em.createQuery("SELECT p FROM Person p WHERE p.age > (SELECT AVG(p.age) FROM Person p)", Person.class);
+        return null;
     }
 
     @Override
     public Set<Person> getPeopleByBirthday() {
         //return null;
         throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    public boolean addCarToPerson(Person person, Car car) {
+        EntityManager em = emf.createEntityManager();
+        Person p = em.find(Person.class, person.getId());
+        if (p == null){
+            throw new IllegalArgumentException("Person not found");
+        }
+        em.getTransaction().begin();
+        if(car.getId()==null){
+            em.persist(car);
+        }else {
+            car = em.find(Car.class, car.getId());
+//            em.merge(car);
+        }
+       // car = em.find(Car.class, car.getId());
+        p.addCar(car);
+        em.getTransaction().commit();
+        em.close();
+        return true;
     }
 
     public static void main(String[] args) {
@@ -116,7 +140,9 @@ public class PersonFacade implements ISelector{
         Phone phone = new Phone("12345678", "Home");
         p.addPhone(phone);
         p.addCar(new Car("Volvo", "V70", 2000));
-        pf.createPerson(p);
+        Person person = pf.createPerson(p);
+        Car car = new Car("Tesla", "modelx", 0);
+        pf.addCarToPerson(person, car);
 //        System.out.println("The person got this new id: " + p.getId());
 //        pf.getAllPersons().forEach((person)-> System.out.println(person));
 //        System.out.println("GET SINGLE PERSON BY ID:");
@@ -128,7 +154,7 @@ public class PersonFacade implements ISelector{
 //        pf.getAllPersons().forEach((person)-> System.out.println(person));
 //        System.out.println("DELETE PERSON WITH ID 1");
 //        pf.deletePerson(1L);
-        pf.getAllPersons().forEach((person)-> System.out.println(person));
+        pf.getAllPersons().forEach((element)-> System.out.println(element));
 //        EntityManager em = emf.createEntityManager();
 //        em.getTransaction().begin();
 //        TypedQuery<Person> tq = em.createNamedQuery("Person.deleteById", Person.class);
@@ -137,4 +163,6 @@ public class PersonFacade implements ISelector{
 //        em.getTransaction().commit();
 //        em.close();
     }
+
+
 }

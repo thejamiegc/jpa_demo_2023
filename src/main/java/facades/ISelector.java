@@ -8,7 +8,7 @@ import java.util.Set;
 public interface ISelector {
     Set<Person> getAllPeople();
     Person getPersonById(Long id);
-    Person getPersonByPhone();
+    Person getPersonByPhone(String phoneNumber);
     Set<Person> getPeopleByCar(Car car);
     Set<Person> getPeopleAboveAvgAge();
     Set<Person> getPeopleByBirthday();
